@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Создание таблиц БД</title>
+</head>
+<body>
+    <h1>SQL-запрос для создания таблицы проекта</h1>
+
+    <pre>
+CREATE TABLE students (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    full_name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    university TEXT,
+    direction TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+    </pre>
+</body>
+</html>
