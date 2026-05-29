@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="page-title compact page-with-image">
+    <div>
+        <p class="eyebrow">Администрирование</p>
+        <h1>Панель управления</h1>
+        <p>Добавляйте вакансии и муниципальные органы, смотрите анкеты студентов и меняйте статус рассмотрения.</p>
+    </div>
+    <img src="{{ url_for('static', filename='images/documents.svg') }}" alt="Админ-панель">
+</section>
+
+<section class="stats-grid small-stats">
+    <div class="stat-card"><span>{{ stats.vacancies }}</span><p>активных вакансий</p></div>
+    <div class="stat-card"><span>{{ stats.organs }}</span><p>муниципальных органов</p></div>
+    <div class="stat-card"><span>{{ stats.new_responses }}</span><p>новых анкет</p></div>
+    <div class="stat-card"><span>{{ stats.review_responses }}</span><p>на рассмотрении</p></div>
+</section>
+
+<div class="dashboard-grid">
+    <section class="panel">
+        <h2>Новый муниципальный орган</h2>
+        <form method="post" action="{{ url_for('add_organ') }}" class="form">
+            <label>Название
+                <input type="text" name="name" required placeholder="Например, Администрация города Тамбова">
+            </label>
+            <label>Город
+                <input type="text" name="city" required placeholder="Тамбов">
+            </label>
+            <label>Адрес
+                <input type="text" name="address" placeholder="Улица, дом">
+            </label>
+            <label>Контактное лицо
+                <input type="text" name="contact" placeholder="ФИО и должность">
+            </label>
+            <button class="btn primary" type="submit">Добавить орган</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Новая вакансия</h2>
+        <form method="post" action="{{ url_for('add_vacancy') }}" class="form">
+            <label>Муниципальный орган
+                <select name="organ_id" required>
+                    <option value="">Выберите орган</option>
+                    {% for organ in organs %}
+                        <option value="{{ organ.id }}">{{ organ.city }} — {{ organ.name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Название вакансии
+                <input type="text" name="title" required placeholder="Специалист отдела правового сопровождения">
+            </label>
+            <label>Иконка карточки
+                <select name="image">
+                    {% for image in vacancy_images %}
+                        <option value="{{ image }}">{{ image }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Требования
+                <textarea name="requirements" rows="3" placeholder="Что должен знать и уметь кандидат"></textarea>
+            </label>
+            <label>Условия
+                <textarea name="conditions" rows="3" placeholder="Формат работы, график, наставник, практика"></textarea>
+            </label>
+            <button class="btn primary" type="submit">Добавить вакансию</button>
+        </form>
+    </section>
+</div>
+
+<section class="panel admin-vacancies-panel">
+    <div class="section-head inside">
+        <div>
+            <p class="eyebrow">Вакансии</p>
+            <h2>Управление вакансиями</h2>
+        </div>
+        <span class="muted">Всего: {{ vacancies|length }}</span>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr><th>Название</th><th>Орган</th><th>Город</th><th>Отклики</th><th>Статус</th><th>Действия</th></tr>
+            </thead>
+            <tbody>
+            {% for vacancy in vacancies %}
+                <tr>
+                    <td><a href="{{ url_for('vacancy_page', vacancy_id=vacancy.id, back='admin') }}">{{ vacancy.title }}</a></td>
+                    <td>{{ vacancy.organ_name }}</td>
+                    <td>{{ vacancy.city }}</td>
+                    <td><span class="count-pill">{{ vacancy.responses_count }}</span></td>
+                    <td><span class="status {{ 'off' if not vacancy.active else '' }}">{{ 'Активна' if vacancy.active else 'Скрыта' }}</span></td>
+                    <td>
+                        <div class="table-actions">
+                            <form method="post" action="{{ url_for('toggle_vacancy', vacancy_id=vacancy.id) }}">
+                                <button class="btn tiny" type="submit">{{ 'Скрыть' if vacancy.active else 'Показать' }}</button>
+                            </form>
+                            <form method="post" action="{{ url_for('delete_vacancy', vacancy_id=vacancy.id) }}" onsubmit="return confirm('Удалить вакансию «{{ vacancy.title }}»? Связанные отклики тоже будут удалены.');">
+                                <button class="btn tiny danger" type="submit">Удалить</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="panel admin-responses-panel">
+    <div class="section-head inside">
+        <div>
+            <p class="eyebrow">Анкеты</p>
+            <h2>Отклики студентов</h2>
+        </div>
+        <span class="muted">Найдено: {{ responses|length }}</span>
+    </div>
+
+    <form class="admin-filter-form" method="get" action="{{ url_for('admin_panel') }}">
+        <input type="text" name="q" value="{{ response_query }}" placeholder="Поиск: ФИО, email, вакансия или орган">
+        <select name="status">
+            <option value="">Все статусы</option>
+            {% for st in response_statuses %}
+                <option value="{{ st }}" {% if response_status == st %}selected{% endif %}>{{ st }}</option>
+            {% endfor %}
+        </select>
+        <button class="btn primary" type="submit">Показать</button>
+        {% if response_query or response_status %}
+            <a class="btn" href="{{ url_for('admin_panel') }}">Сбросить</a>
+        {% endif %}
+    </form>
+
+    <div class="responses-list compact-list">
+        {% for response in responses %}
+            <article class="response-card admin-response-card">
+                <div class="response-head">
+                    <div>
+                        <div class="response-meta-line">
+                            <span class="status">{{ response.status }}</span>
+                            <span class="date">{{ response.response_date[:10] }}</span>
+                        </div>
+                        <h3>{{ response.application_name }}</h3>
+                        <p class="muted">{{ response.vacancy_title }} · {{ response.organ_name }}</p>
+                    </div>
+                    <form method="post" action="{{ url_for('update_response_status', response_id=response.id) }}" class="inline-form">
+                        <select name="status">
+                            {% for st in response_statuses %}
+                                <option value="{{ st }}" {% if response.status == st %}selected{% endif %}>{{ st }}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="btn tiny" type="submit">Сохранить</button>
+                    </form>
+                </div>
+
+                <details class="response-details">
+                    <summary>Открыть анкету</summary>
+                    <div class="preview-grid admin-preview">
+                        <div><span>Email</span><strong>{{ response.application_email }}</strong></div>
+                        <div><span>Телефон</span><strong>{{ response.application_phone or 'не указан' }}</strong></div>
+                        <div><span>ВУЗ</span><strong>{{ response.application_university or 'не указан' }}</strong></div>
+                        <div><span>Направление</span><strong>{{ response.application_direction or 'не указано' }}</strong></div>
+                        <div><span>Курс</span><strong>{% if response.application_course %}{{ response.application_course }} курс{% else %}не указан{% endif %}</strong></div>
+                        <div><span>Вакансия</span><strong><a href="{{ url_for('vacancy_page', vacancy_id=response.vacancy_id, back='admin') }}">Открыть</a></strong></div>
+                    </div>
+                    {% if response.cover_letter %}
+                        <div class="preview-letter"><span>Сопроводительное письмо</span><p>{{ response.cover_letter }}</p></div>
+                    {% endif %}
+                    <div class="document-grid compact-docs">
+                        {% for doc in docs_by_student.get(response.student_id, []) %}
+                            <a class="document-card" href="{{ url_for('uploaded_file', filename=doc.filename) }}" target="_blank">
+                                <strong>{{ doc.original_name }}</strong>
+                                <span class="muted">открыть документ</span>
+                            </a>
+                        {% else %}
+                            <div class="empty">Документы не приложены.</div>
+                        {% endfor %}
+                    </div>
+                </details>
+            </article>
+        {% else %}
+            <div class="empty">По выбранным условиям откликов нет.</div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

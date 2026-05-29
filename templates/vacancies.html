@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="page-title compact page-with-image">
+    <div>
+        <p class="eyebrow">Каталог</p>
+        <h1>Муниципальные вакансии</h1>
+        <p>Выберите подходящую вакансию или стажировку. Отклик открывается как анкета: данные можно проверить и только потом отправить.</p>
+    </div>
+    <img src="{{ url_for('static', filename='images/analytics.svg') }}" alt="Каталог вакансий">
+</section>
+
+<form class="filter-form" method="get">
+    <input type="text" name="q" value="{{ search }}" placeholder="Поиск по названию или требованиям">
+    <select name="city">
+        <option value="">Все города</option>
+        {% for row in cities %}
+            <option value="{{ row.city }}" {% if city == row.city %}selected{% endif %}>{{ row.city }}</option>
+        {% endfor %}
+    </select>
+    <button class="btn primary" type="submit">Найти</button>
+</form>
+
+<div class="cards-grid">
+    {% for vacancy in vacancies %}
+        <article class="vacancy-card">
+            <div class="vacancy-card-head">
+                <span class="vacancy-icon">
+                    <img src="{{ url_for('static', filename='images/' + vacancy.image) }}" alt="">
+                </span>
+                <div class="card-top">
+                    <span class="badge">{{ vacancy.city }}</span>
+                    <span class="date">{{ vacancy.date_publication[:10] }}</span>
+                </div>
+            </div>
+            <h3>{{ vacancy.title }}</h3>
+            <p class="muted">{{ vacancy.organ_name }}</p>
+            <p>{{ vacancy.requirements[:135] }}{% if vacancy.requirements|length > 135 %}...{% endif %}</p>
+            <div class="card-actions">
+                <a class="btn small" href="{{ url_for('vacancy_page', vacancy_id=vacancy.id) }}">Открыть</a>
+                {% if current_user.is_authenticated and current_user.get_role() == 'student' %}
+                    <a class="btn small secondary" href="{{ url_for('apply', vacancy_id=vacancy.id) }}">Откликнуться</a>
+                {% elif not current_user.is_authenticated %}
+                    <a class="btn small secondary" href="{{ url_for('login', next=url_for('apply', vacancy_id=vacancy.id)) }}">Откликнуться</a>
+                {% endif %}
+            </div>
+        </article>
+    {% else %}
+        <div class="empty">Вакансии не найдены.</div>
+    {% endfor %}
+</div>
+{% endblock %}

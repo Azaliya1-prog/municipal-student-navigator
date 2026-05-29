@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block content %}
+<a class="back-link" href="{{ url_for('vacancy_page', vacancy_id=vacancy.id) }}">← К вакансии</a>
+
+<section class="page-title compact apply-title">
+    <div>
+        <p class="eyebrow">Отклик на вакансию</p>
+        <h1>{{ vacancy.title }}</h1>
+        <p>{{ vacancy.organ_name }} · {{ vacancy.city }}</p>
+    </div>
+</section>
+
+<div class="apply-progress">
+    <span class="active">1. Заполнить данные</span>
+    <span class="{{ 'active' if mode == 'preview' else '' }}">2. Конечная сверка</span>
+    <span>3. Отправить</span>
+</div>
+
+{% if mode == 'preview' %}
+<section class="panel preview-panel">
+    <div class="section-head inside">
+        <div>
+            <p class="eyebrow">Проверка</p>
+            <h2>Конечная сверка анкеты</h2>
+        </div>
+    </div>
+    <div class="preview-grid">
+        <div><span>ФИО</span><strong>{{ application.full_name }}</strong></div>
+        <div><span>Email</span><strong>{{ application.email }}</strong></div>
+        <div><span>Телефон</span><strong>{{ application.phone or 'не указан' }}</strong></div>
+        <div><span>ВУЗ</span><strong>{{ application.university or 'не указан' }}</strong></div>
+        <div><span>Направление</span><strong>{{ application.direction or 'не указано' }}</strong></div>
+        <div><span>Курс</span><strong>{% if application.course %}{{ application.course }} курс{% else %}не указан{% endif %}</strong></div>
+    </div>
+    <div class="preview-letter">
+        <span>Сопроводительное письмо</span>
+        <p>{{ application.cover_letter or 'не заполнено' }}</p>
+    </div>
+
+    <div class="attached-docs">
+        <h3>Документы из портфолио</h3>
+        <div class="document-grid compact-docs">
+            {% for doc in documents %}
+                <a class="document-card" href="{{ url_for('uploaded_file', filename=doc.filename) }}" target="_blank">
+                    <strong>{{ doc.original_name }}</strong>
+                    <span class="muted">открыть</span>
+                </a>
+            {% else %}
+                <div class="empty">Документы не прикреплены. Их можно добавить в личном кабинете.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <form method="post" class="form preview-actions">
+        {% for key, value in application.items() %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+        {% endfor %}
+        <button class="btn primary" type="submit" name="action" value="send">Отправить работодателю</button>
+        <button class="btn" type="submit" name="action" value="edit">Изменить данные</button>
+    </form>
+</section>
+{% else %}
+<section class="panel apply-panel">
+    <div class="section-head inside">
+        <div>
+            <p class="eyebrow">Анкета</p>
+            <h2>Заполните данные для отклика</h2>
+            <p class="muted">Данные можно проверить и при необходимости исправить перед конечной сверкой.</p>
+        </div>
+        <a class="btn small" href="{{ url_for('profile') }}">Личный кабинет</a>
+    </div>
+    <form method="post" class="form two-col-form application-form">
+        <label>ФИО
+            <input type="text" name="full_name" value="{{ application.full_name }}" required>
+        </label>
+        <label>Email
+            <input type="email" name="email" value="{{ application.email }}" required>
+        </label>
+        <label>Телефон
+            <input type="text" name="phone" value="{{ application.phone }}">
+        </label>
+        <label>ВУЗ
+            <input type="text" name="university" value="{{ application.university }}">
+        </label>
+        <label>Направление подготовки
+            <input type="text" name="direction" value="{{ application.direction }}">
+        </label>
+        <label>Курс
+            <select name="course">
+                <option value="">Выберите курс</option>
+                {% for course in courses %}
+                    <option value="{{ course }}" {% if application.course == course %}selected{% endif %}>{{ course }} курс</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="full-row">Сопроводительное письмо
+            <textarea name="cover_letter" rows="5">{{ application.cover_letter }}</textarea>
+        </label>
+        <div class="attached-docs full-row">
+            <h3>Документы портфолио</h3>
+            <p class="muted">Эти файлы будут доступны администратору вместе с откликом.</p>
+            <div class="document-grid compact-docs">
+                {% for doc in documents %}
+                    <a class="document-card" href="{{ url_for('uploaded_file', filename=doc.filename) }}" target="_blank">
+                        <strong>{{ doc.original_name }}</strong>
+                        <span class="muted">открыть</span>
+                    </a>
+                {% else %}
+                    <div class="empty">Документы не добавлены. Загрузите их в личном кабинете.</div>
+                {% endfor %}
+            </div>
+        </div>
+        <button class="btn primary full" type="submit" name="action" value="preview">Перейти к конечной сверке</button>
+    </form>
+</section>
+{% endif %}
+{% endblock %}

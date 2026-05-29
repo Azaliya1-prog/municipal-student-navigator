@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="page-title about-title">
+    <div>
+        <p class="eyebrow">О проекте</p>
+        <h1>Молодежь на муниципальной службе</h1>
+        <p>
+            Сайт объединяет студентов и муниципальные органы Тамбовской области. Студенты получают удобный каталог
+            вакансий и стажировок, а представители администраций — доступ к структурированным откликам и портфолио.
+        </p>
+    </div>
+    <img src="{{ url_for('static', filename='images/city.svg') }}" alt="Муниципальная служба">
+</section>
+
+<div class="two-columns">
+    <div class="panel feature-panel">
+        <h2>Для студентов</h2>
+        <p>Просмотр вакансий, личный кабинет, портфолио, загрузка нескольких документов и отправка анкеты после проверки.</p>
+    </div>
+    <div class="panel feature-panel">
+        <h2>Для муниципальных органов</h2>
+        <p>Публикация вакансий, просмотр откликов, документы портфолио и изменение статусов рассмотрения.</p>
+    </div>
+</div>
+
+<section class="panel">
+    <h2>Как работает навигатор</h2>
+    <div class="process-line">
+        <div><strong>1</strong><span>Регистрация студента</span></div>
+        <div><strong>2</strong><span>Заполнение портфолио</span></div>
+        <div><strong>3</strong><span>Выбор вакансии</span></div>
+        <div><strong>4</strong><span>Проверка и отправка анкеты</span></div>
+    </div>
+</section>
+{% endblock %}

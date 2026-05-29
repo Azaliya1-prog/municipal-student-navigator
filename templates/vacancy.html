@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if back == 'admin' and current_user.is_authenticated and current_user.get_role() == 'admin' %}
+    <a class="back-link" href="{{ url_for('admin_panel') }}">← В админ-панель</a>
+{% else %}
+    <a class="back-link" href="{{ url_for('vacancies') }}">← К списку вакансий</a>
+{% endif %}
+<section class="detail-card vacancy-detail">
+    <div class="detail-head">
+        <div>
+            <div class="card-top left">
+                <span class="badge">{{ vacancy.city }}</span>
+                <span class="date">Опубликовано: {{ vacancy.date_publication[:10] }}</span>
+            </div>
+            <h1>{{ vacancy.title }}</h1>
+            <p class="muted">{{ vacancy.organ_name }}</p>
+        </div>
+        <div class="detail-icon"><img src="{{ url_for('static', filename='images/' + vacancy.image) }}" alt="{{ vacancy.title }}"></div>
+    </div>
+
+    <div class="detail-grid">
+        <div>
+            <h3>Требования</h3>
+            <p>{{ vacancy.requirements }}</p>
+        </div>
+        <div>
+            <h3>Условия</h3>
+            <p>{{ vacancy.conditions }}</p>
+        </div>
+    </div>
+
+    <div class="contact-box">
+        <strong>Контакты органа:</strong>
+        <p>{{ vacancy.address }}</p>
+        <p>{{ vacancy.contact }}</p>
+    </div>
+
+    {% if current_user.is_authenticated and current_user.get_role() == 'student' %}
+        {% if already_applied %}
+            <button class="btn" disabled>Отклик уже отправлен</button>
+        {% else %}
+            <a class="btn primary" href="{{ url_for('apply', vacancy_id=vacancy.id) }}">Откликнуться</a>
+        {% endif %}
+    {% elif not current_user.is_authenticated %}
+        <a class="btn primary" href="{{ url_for('login', next=url_for('apply', vacancy_id=vacancy.id)) }}">Войти, чтобы откликнуться</a>
+    {% endif %}
+</section>
+{% endblock %}

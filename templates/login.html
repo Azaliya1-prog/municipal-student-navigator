@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="auth-card">
+    <h1>Авторизация</h1>
+    <p class="muted">Введите email и пароль для доступа к личному кабинету.</p>
+    <form method="post" class="form">
+        <label>Email
+            <input type="email" name="email" required placeholder="example@mail.ru">
+        </label>
+        <label>Пароль
+            <input type="password" name="password" required placeholder="Введите пароль">
+        </label>
+        <label class="inline-check">
+            <input type="checkbox" name="remember"> Запомнить меня
+        </label>
+        <button class="btn primary" type="submit">Войти</button>
+    </form>
+    <p class="auth-note">Еще нет аккаунта? <a href="{{ url_for('register') }}">Создать</a></p>
+</section>
+{% endblock %}

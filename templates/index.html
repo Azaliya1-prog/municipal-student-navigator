@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="hero">
+    <div class="hero-text">
+        <p class="hero-kicker">Профессиональный навигатор для студентов</p>
+        <h1>Первый шаг к работе в муниципальной сфере</h1>
+        <p>
+            Площадка помогает студентам найти стажировку или вакансию в органах местного самоуправления,
+            собрать портфолио и отправить аккуратную анкету работодателю.
+        </p>
+        <div class="hero-actions">
+            <a class="btn primary" href="{{ url_for('vacancies') }}">Смотреть вакансии</a>
+            {% if not current_user.is_authenticated %}
+                <a class="btn" href="{{ url_for('login') }}">Авторизоваться</a>
+            {% else %}
+                {% if current_user.get_role() == 'admin' %}
+                    <a class="btn" href="{{ url_for('admin_panel') }}">Админ-панель</a>
+                {% else %}
+                    <a class="btn" href="{{ url_for('profile') }}">Личный кабинет</a>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    <div class="hero-visual">
+        <img src="{{ url_for('static', filename='images/hero.svg') }}" alt="Студенты и муниципальная служба">
+    </div>
+</section>
+
+
+<section class="section-head">
+    <div>
+        <p class="eyebrow">Свежие предложения</p>
+        <h2>Вакансии для студентов</h2>
+    </div>
+    <a class="link" href="{{ url_for('vacancies') }}">Все вакансии →</a>
+</section>
+
+<div class="cards-grid">
+    {% for vacancy in vacancies %}
+        <article class="vacancy-card">
+            <div class="vacancy-card-head">
+                <span class="vacancy-icon">
+                    <img src="{{ url_for('static', filename='images/' + vacancy.image) }}" alt="">
+                </span>
+                <div class="card-top">
+                    <span class="badge">{{ vacancy.city }}</span>
+                    <span class="date">{{ vacancy.date_publication[:10] }}</span>
+                </div>
+            </div>
+            <h3>{{ vacancy.title }}</h3>
+            <p class="muted">{{ vacancy.organ_name }}</p>
+            <p>{{ vacancy.requirements[:120] }}{% if vacancy.requirements|length > 120 %}...{% endif %}</p>
+            <a class="btn small" href="{{ url_for('vacancy_page', vacancy_id=vacancy.id) }}">Подробнее</a>
+        </article>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="page-title compact page-with-image">
+    <div>
+        <p class="eyebrow">Личный кабинет</p>
+        <h1>Кабинет студента</h1>
+        <p>Заполните данные, соберите портфолио, прикрепите документы и отслеживайте статус откликов.</p>
+    </div>
+    <img src="{{ url_for('static', filename='images/students.svg') }}" alt="Личный кабинет">
+</section>
+
+<div class="dashboard-grid">
+    <section class="panel">
+        <h2>Данные студента</h2>
+        <form method="post" action="{{ url_for('update_student') }}" class="form">
+            <label>ФИО
+                <input type="text" name="full_name" value="{{ student.full_name or '' }}" required>
+            </label>
+            <label>ВУЗ
+                <input type="text" name="university" value="{{ student.university or '' }}">
+            </label>
+            <label>Направление
+                <input type="text" name="direction" value="{{ student.direction or '' }}">
+            </label>
+            <label>Курс
+                <select name="course">
+                    <option value="">Выберите курс</option>
+                    {% for course in courses %}
+                        <option value="{{ course }}" {% if student.course == course %}selected{% endif %}>{{ course }} курс</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Email
+                <input type="email" name="email" value="{{ student.email or '' }}" required>
+            </label>
+            <label>Телефон
+                <input type="text" name="phone" value="{{ student.phone or '' }}">
+            </label>
+            <button class="btn primary" type="submit">Сохранить данные</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Портфолио</h2>
+        <form method="post" action="{{ url_for('save_portfolio') }}" enctype="multipart/form-data" class="form">
+            <label>Краткое описание
+                <textarea name="description" rows="4" placeholder="Расскажите о профессиональных интересах">{{ portfolio.description if portfolio else '' }}</textarea>
+            </label>
+            <label>Навыки
+                <textarea name="skills" rows="3" placeholder="Например: деловая переписка, Excel, работа с нормативными актами">{{ portfolio.skills if portfolio else '' }}</textarea>
+            </label>
+            <label>Достижения
+                <textarea name="achievements" rows="3" placeholder="Конференции, олимпиады, волонтерские проекты">{{ portfolio.achievements if portfolio else '' }}</textarea>
+            </label>
+            <label>Ссылка на резюме
+                <input type="url" name="resume_link" value="{{ portfolio.resume_link if portfolio else '' }}" placeholder="https://...">
+            </label>
+            <label class="upload-box">Добавить документы по клику
+                <span>Можно выбрать сразу несколько файлов: резюме, сертификаты, грамоты, рекомендации.</span>
+                <input type="file" name="documents" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" multiple>
+            </label>
+            <button class="btn primary" type="submit">Сохранить портфолио</button>
+        </form>
+    </section>
+</div>
+
+<section class="panel">
+    <div class="section-head inside">
+        <div>
+            <p class="eyebrow">Файлы</p>
+            <h2>Документы портфолио</h2>
+        </div>
+    </div>
+    <div class="document-grid">
+        {% for doc in documents %}
+            <div class="document-card">
+                <div>
+                    <strong>{{ doc.original_name }}</strong>
+                    <p class="muted">Загружено: {{ doc.uploaded_at[:10] }}</p>
+                </div>
+                <div class="document-actions">
+                    <a class="btn tiny" href="{{ url_for('uploaded_file', filename=doc.filename) }}" target="_blank">Открыть</a>
+                    <form method="post" action="{{ url_for('delete_document', document_id=doc.id) }}">
+                        <button class="btn tiny danger-btn" type="submit">Удалить</button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty">Документы пока не добавлены.</div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="panel">
+    <div class="section-head inside">
+        <div>
+            <p class="eyebrow">История</p>
+            <h2>Мои отклики</h2>
+        </div>
+        <a class="btn small" href="{{ url_for('vacancies') }}">Найти вакансию</a>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr><th>Вакансия</th><th>Орган</th><th>Город</th><th>Дата</th><th>Статус</th></tr>
+            </thead>
+            <tbody>
+            {% for item in responses %}
+                <tr>
+                    <td><a href="{{ url_for('vacancy_page', vacancy_id=item.vacancy_id) }}">{{ item.vacancy_title }}</a></td>
+                    <td>{{ item.organ_name }}</td>
+                    <td>{{ item.city }}</td>
+                    <td>{{ item.response_date[:10] }}</td>
+                    <td><span class="status">{{ item.status }}</span></td>
+                </tr>
+            {% else %}
+                <tr><td colspan="5" class="empty-cell">Откликов пока нет.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="auth-card wide">
+    <h1>Регистрация студента</h1>
+    <p class="muted">Создайте профиль, чтобы сохранять портфолио и отправлять анкеты на вакансии.</p>
+    <form method="post" class="form two-col-form">
+        <label>ФИО
+            <input type="text" name="full_name" value="{{ form.full_name or '' }}" required>
+        </label>
+        <label>Email
+            <input type="email" name="email" value="{{ form.email or '' }}" required>
+        </label>
+        <label>Телефон
+            <input type="text" name="phone" value="{{ form.phone or '' }}">
+        </label>
+        <label>ВУЗ
+            <input type="text" name="university" value="{{ form.university or '' }}" placeholder="Например, ТГУ им. Г.Р. Державина">
+        </label>
+        <label>Направление подготовки
+            <input type="text" name="direction" value="{{ form.direction or '' }}" placeholder="Юриспруденция, ГМУ, экономика">
+        </label>
+        <label>Курс
+            <select name="course">
+                <option value="">Выберите курс</option>
+                {% for course in courses %}
+                    <option value="{{ course }}" {% if form.course == course %}selected{% endif %}>{{ course }} курс</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Пароль
+            <input type="password" name="password" required minlength="6">
+        </label>
+        <label>Повторите пароль
+            <input type="password" name="password2" required minlength="6">
+        </label>
+        <button class="btn primary full" type="submit">Зарегистрироваться</button>
+    </form>
+</section>
+{% endblock %}
